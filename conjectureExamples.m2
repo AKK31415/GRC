@@ -46,9 +46,7 @@ makeMonomials(List,ZZ) := (L,d) -> (
     )
 )
 
-R = QQ[x,y,z, Degrees => {1,1,2}]
 
-makeMonomials({x,y,z},3)
 
 
 
@@ -62,11 +60,18 @@ weightedVeronese(ZZ,ZZ,Ring) := (n,e,kk) -> (
 
 
 {*
-    R = makeP1n2Ring(3,QQ)
-    gens R
-    degrees R
-    degree y
 
+
+R = makeP1n2Ring(3,QQ)
+gens R
+degrees R
+degree y
+
+
+
+R = QQ[x,y,z, Degrees => {1,1,2}]
+
+makeMonomials({x,y,z},3)
 
 
 
