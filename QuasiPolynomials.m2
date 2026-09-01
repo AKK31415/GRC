@@ -19,7 +19,6 @@ newPackage(
 
 export {
     -*
-
     -- types
     -- Leaving these as examples right now
     "YoungDiagram",
@@ -28,25 +27,22 @@ export {
     -- methods
     "youngDiagram",
     "youngTableau",
-    "skewDiagram",
-    "armLength",
-    "legLength",
-    "hookLength",
-    "youngSymmetrizer",
-    "numberStandardYoungTableaux",
-    "highestWeightFilling",
-    "rowsFirstFilling",
-    "randomFilling",
-    "isStandard",
-    "isSemiStandard",
-    "getCandidateFillings",
-    "filledSYT",
-    "filledSemiSYT"
     -- symbols
     -- "Weak"
-
     *-
 }
+
+-*
+QuasiPoly = new Type of List;
+makeQuasiPoly = method(TypicalValue => QuasiPoly);
+makeQuasiPoly(ZZ, ZZ) := QuasiPoly => (deg, idx) -> (
+    new CGVertex from {symbol degree => deg, symbol index => idx, symbol weight => null, symbol label => null}
+);
+
+makeVerCGtex(ZZ, ZZ, Thing) := CGVertex => (deg, idx, wt) -> (
+    new CGVertex from {symbol degree => deg, symbol index => idx, symbol weight => wt, symbol label => null}
+);
+*-
 
 
 T=QQ[t]
