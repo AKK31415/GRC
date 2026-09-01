@@ -36,7 +36,11 @@ export {
 T := QQ[getSymbol "t"];
 t := T_0;
 
---Type definition
+
+------------------------------------------------
+-- Typing for Quasi polys
+----------------------------------------------
+
 QuasiPolynomial = new Type of HashTable
 
 quasiPolynomial = method(TypicalValue => QuasiPolynomial)
@@ -84,62 +88,119 @@ net QuasiPolynomial := Q -> (
     else stack apply(Q.period, i -> (toString i | ": ") | net Q.constituents#i)
 )
 
+toString QuasiPolynomial := Q -> toString apply(Q.constituents, toString)
 
---quasiPolyRing(S): takes in a nonstandard ZZ-graded polynomial ring and outputs the quasi-Hilbert polynomial
-  --Input: S = nonstandard ZZ-graded polynomial ring
-  --Output: quasipolynomial
-quasiPolyRing = (S) -> (
-    alpha= lcm(flatten degrees S);
-    n = numgens S;
-    for i from 0 to alpha when i < alpha list (
-	pts = apply(n+2, j->((j+1)*alpha+i));
-	mat = sub(matrix(apply(n+2, k->apply(n+2, j->pts_k^j))), QQ);
-	vals=transpose(matrix{apply(n+2, k->hilbertFunction((k+1)*alpha+i,S))});
-	coeffs = sub(inverse(mat)*vals, T);
-	quasipoly = 0;
-	for j from 0 to n+1 do(
-	    quasipoly = quasipoly + coeffs_(j,0)*t^j
-	    );
-	quasipoly
-	)
+--evaluate the quasipoly Q(n) picks the right constituent to evaluate at n
+QuasiPolynomial ZZ := (Q,n) -> (
+    ev := map(QQ, T, {promote(n,QQ)});
+    ev Q.constituent#(n % Q.period)
+)
+
+--degree of quasi polynomial is the max degree of its constituents
+--I think they should be the same but this is safer
+degree QuasiPolynomial := Q -> max apply(Q.consitutents, p -> first degree p)
+
+
+-------------------------------------------
+--arithmetic with quasi polys
+------------------------------------
+
+--equality of quasi polys is same period, same constituents
+QuasiPolynomial == QuasiPolynomial := (Q, R) -> (
+    Q.period == R.period and Q.constituents == R.constituents
+)
+
+--addition of quasi polys
+QuasiPolynomial + QuasiPolynomial := (Q,R) -> (
+    p := lcm(Q.period, R.period);
+    quasiPolynomial apply(p, i -> 
+        Q.constituents#(i % Q.period) + R.constituents#(i % R.period))
+)
+
+--negative quasi poly
+- QuasiPolynomial := Q -> quasiPolynomial apply(Q.constituents, p -> -p)
+
+--subtraction of quasi poly
+QuasiPolynomial - QuasiPolynomial := (Q,R) -> Q + (-R)
+
+--multiplication of quasi polys
+QuasiPolynomial * QuasiPolynomial := (Q,R) -> (
+    p := lcm(Q.period, R.period) --new period
+    quasiPolynomial apply(p, i -> 
+        Q.constituents#(i % Q.period) * R.constituents#(i % R.period))
+)
+
+
+--scaling properties
+ZZ * QuasiPolynomial := (c,Q) -> quasiPolynomial apply(Q.constituents, p -> c*p)
+QQ * QuasiPolynomial := (c,Q) -> quasiPolynomial apply(Q.constituents, p -> c*p)
+--right is same as left scalar multiplication
+QuasiPolynomial * ZZ := (Q,c) -> c * Q
+QuasiPolynomial * QQ := (Q, c) -> c*Q
+
+------------------------------------
+-- Hilbert quasi polys
+-----------------------------------
+--quasiPolynomial(S): input: S = nonstandard ZZ-graded poly ring
+--output: Quasi Polynomial
+quasiPolynomial PolynomialRing := S -> (
+    --if this has been computed for the instance previously, return it
+    if S.?cache and S.cache#?QuasiPolynomial then return S.cache#QuasiPolynomial;
+    if degreeLength S !=1 hen error "quasiPolynomial expects singly ZZ-graded ring";
+    if any(flattened degrees S, d-> d<=0) then error "quasiPolynomial expects generators of positive degree only";
+    alpha := lcm flatten degrees S;
+    n := numgens S;
+    Q := quasiPolynomial for i from 0 to alpha-1 list (
+        pts := apply(n+2, j -> (j+1)*alpha + i);
+        mat := sub(matrix apply(n+2, k -> apply(n+2, j -> pts_k^j)) QQ);
+        vals := sub(transpose matrix {apply(n+2, k -> hilbertFunction((k+1)*alpha+i, S))}, QQ);
+        coeffs := solve(mat,vals);
+        sum(n+2, j -> coeffs_(j,0) *t^j)
+        );
+
+    if not S.?cache then S.cache = new CacheTable;
+    S.cache#QuasiPolynomial = Q
+)
+
+--quasiPolyFree(M,S) takes free module over nonstandard ZZ-graded ring
+--outputs quasipolynomial
+
+quasiPolyFree := (M,S) -> (
+    degs := flatten degrees M;
+    m := numgens M;
+    alpha := lcm flatten degrees S;
+    qp := quasiPolynomial S;
+    if m == 0 then return quasiPolynomial {0_T};
+    quasiPolynomial for i from 0 to alpha - 1 list (
+        L := for k from 0 to m-1 list (
+            j := (i - degs_k) % alpha;
+            shift := map(T, T, {t - degs_k});
+            shift qp.constituents#j
+        )
+        sum L
     )
+)
 
+--quasiPolynomial(M) input module over nonstandard ZZ-graded poly ring
+-- output quasiPolynomial 
 
---quasiPolyFree(M,S): takes in a free module over a nonstandard ZZ-graded polynomial ring and outputs the quasi Hilbert polynomial
-    --Input: M a free module, S a nonstandard ZZ-graded polynomial ring
-    --Output: quasipolynomial
-quasiPolyFree = (M, S) -> (
-    degs = flatten degrees M;
-    m = numgens M;
-    alpha= lcm(flatten degrees S);
-    qp = quasiPolyRing(S);
-    for i from 0 to alpha when i < alpha list(
-	L = for k from 0 to m-1 list (
-	    j=i-degs_k % alpha;
-	    qpList = toList qp_j;
-	    shift = map(T,T,{t-degs_k});
-	    shift((1/alpha)*qpList_0)
-	    );
-	sum L
-	)
-    )
-
---quasiPolynomial(M,S): takes in a module over a nonstandard ZZ-graded polynomial ring and outputs the quasi Hilbert polynomial
-    --Input: M a graded module, S a nonstandard ZZ-graded polynomial ring (note that if you input an ideal of S this will give the Hilbert series for S/I not for I as a subobject)
-    --Output: quasipolynomial
-quasiPolynomial = (M, S) -> (
-    F = res M;
-    L = for i from 0 to length F list(
-	(-1)^i*quasiPolyFree(F_i,S)	  
-	);
-    q = L_0;
-    for  j from 1 to length F do(
-	q = q+L_j
-	);
+quasiPolynomial Module := M -> (
+    S := ring M;
+    if not isPolynomialRing S then error "quasiPolynomial expects module over polynomial ring";
+    if not isHomogeneous M then error "quasiPolynomial expects homogeneous module";
+    F := res M;
+    L := for i from 0 to length F list (
+        (-1)^i * quasiPolyFree(F_i, S)
+    );
+    q := L_0;
+    for j from 1 to length F do (
+        q = q + L_j
+    );
     q
-    )
+)
 
-
+--for ideal I give quasi Polynomial of S/I
+quasiPolynomial Ideal := I -> quasiPolynomial comodule I
 
 beginDocumentation()
 load "./QuasiPolynomials/docs.m2"
