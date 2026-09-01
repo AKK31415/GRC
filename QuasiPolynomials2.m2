@@ -20,32 +20,32 @@ quasiPolyRing = (S) -> (
     )
 
 
---quasiPolyFree(M,S): takes in a free module over a nonstandard ZZ-graded polynomial ring and outputs the quasi Hilbert polynomial
-    --Input: M a free module, S a nonstandard ZZ-graded polynomial ring
+--quasiPolyFree(M): takes in a free module over a nonstandard ZZ-graded polynomial ring and outputs the quasi Hilbert polynomial
+    --Input: M a free module
     --Output: quasipolynomial
-quasiPolyFree = (M, S) -> (
+quasiPolyFree = (M) -> (
     degs = flatten degrees M;
     m = numgens M;
-    alpha= lcm(flatten degrees S);
-    qp = quasiPolyRing(S);
+    s=ring M;
+    alpha= lcm(flatten degrees s);
+    qp = quasiPolyRing(s);
     for i from 0 to alpha when i < alpha list(
 	L = for k from 0 to m-1 list (
 	    j=i-degs_k % alpha;
-	    qpList = toList qp_j;
 	    shift = map(T,T,{t-degs_k});
-	    shift((1/alpha)*qpList_0)
+	    shift(qp_j)
 	    );
 	sum L
 	)
     )
 
---quasiPolynomial(M,S): takes in a module over a nonstandard ZZ-graded polynomial ring and outputs the quasi Hilbert polynomial
-    --Input: M a graded module, S a nonstandard ZZ-graded polynomial ring (note that if you input an ideal of S this will give the Hilbert series for S/I not for I as a subobject)
+--quasiPolynomial(M): takes in a module over a nonstandard ZZ-graded polynomial ring and outputs the quasi Hilbert polynomial
+    --Input: M a graded module  (note that if you input an ideal of S this will give the Hilbert series for S/I not for I as a subobject)
     --Output: quasipolynomial
-quasiPolynomial = (M, S) -> (
+quasiPolynomial = (M) -> (
     F = res M;
     L = for i from 0 to length F list(
-	(-1)^i*quasiPolyFree(F_i,S)	  
+	(-1)^i*quasiPolyFree(F_i)	  
 	);
     q = L_0;
     for  j from 1 to length F do(
@@ -53,13 +53,14 @@ quasiPolynomial = (M, S) -> (
 	);
     q
     )
-
---TO DO: do more extensive testing, fix the fact that interpolation happens over the reals not the rational numbers
 end--
 
 restart 
-needs "Quasipolynomials.m2"
+needs "QuasiPolynomials2.m2"
 --Example
-R=QQ[x,y,z, Degrees=>{1,2,3}]
-I = ideal(x^2-y)
-quasiPolynomial(I,R)
+T=QQ[t]
+R=QQ[x,y, Degrees=>{1,2}]
+I = ideal(x)
+quasiPolyRing(R)
+quasiPolynomial(I)
+
