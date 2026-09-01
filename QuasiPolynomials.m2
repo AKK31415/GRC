@@ -8,7 +8,7 @@ newPackage(
         {Name => "Andrew Karsten", 
          Email => "akk0071@auburn.edu"},
         {Name => "Ben Betts",
-         Email => "",
+         Email => "fraughn@unm.edu",
          HomePage => ""},
         {Name => "Isadora Bailey",
          Email => "",
@@ -18,34 +18,73 @@ newPackage(
 )
 
 export {
-    -*
+    
     -- types
-    -- Leaving these as examples right now
-    "YoungDiagram",
-    "YoungTableau",
-    "SkewDiagram",
+    "QuasiPolynomial",
+
     -- methods
-    "youngDiagram",
-    "youngTableau",
-    -- symbols
-    -- "Weak"
-    *-
+    "quasiPolynomial",
+
+    --symbols
+    "constituents", --Stanley's term for the polynomials in the list
+    "period"
+
+    
 }
 
--*
-QuasiPoly = new Type of List;
-makeQuasiPoly = method(TypicalValue => QuasiPoly);
-makeQuasiPoly(ZZ, ZZ) := QuasiPoly => (deg, idx) -> (
-    new CGVertex from {symbol degree => deg, symbol index => idx, symbol weight => null, symbol label => null}
-);
+--private ring for constituents to live in
+T := QQ[getSymbol "t"];
+t := T_0;
 
-makeVerCGtex(ZZ, ZZ, Thing) := CGVertex => (deg, idx, wt) -> (
-    new CGVertex from {symbol degree => deg, symbol index => idx, symbol weight => wt, symbol label => null}
-);
-*-
+--Type definition
+QuasiPolynomial = new Type of HashTable
+
+quasiPolynomial = method(TypicalValue => QuasiPolynomial)
+--constructor from a list of polys. consituent i tells the coefficients (i mod period)
+--automatically reduce to the actual period if overdetermined
+
+quasiPolynomial List := L -> (
+    if #L ==0 then error "nonempty list expected for quasiPolynomial";
+
+    L' := apply(L, p -> sub(p, T));
+    n := $L';
+
+    --reduce to minimal period by finding smallest divisor e of n
+    --such that the list repeats every e entries
+    minPer := n;
+    for e from 1 to n do (
+        if n % e !=0 then continue;
+        if all(n, i -> L'#i == L'#(i % e)) then (
+            minPer = e;
+            break;
+            );
+        );
+
+    new QuasiPolynomial from {
+        symbol constituents => take(L', minPer),
+        symbol period => minPer,
+        --This cache symbol is standard and useful for if we eventually have a
+        --quasiPolynomial method that is expensive and we want to call it multiple
+        --times for the same instance of the object. 
+        symbol cache => new CacheTable
+    }
+)
+
+--casting: a polynomial or scalar is a quasipoly with period 1
+
+quasiPolynomial RingElement := f -> quasiPolynomial {f}
+quasiPolynomial ZZ := n -> quasiPolynomial {n*1_T}
+quasiPolynomial QQ :- q -> quasiPolynomial {q*1_T}
 
 
-T=QQ[t]
+--printing: we might fiddle with this a bit for what looks best.
+--for now its simply 1 line for each poly in the quasipoly
+net QuasiPolynomial := Q -> (
+    if Q.period == 1 then net Q.constituents#0
+    else stack apply(Q.period, i -> (toString i | ": ") | net Q.constituents#i)
+)
+
+
 --quasiPolyRing(S): takes in a nonstandard ZZ-graded polynomial ring and outputs the quasi-Hilbert polynomial
   --Input: S = nonstandard ZZ-graded polynomial ring
   --Output: quasipolynomial
