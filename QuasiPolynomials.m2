@@ -1,6 +1,7 @@
 newPackage(
     "QuasiPolynomials",
     AuxiliaryFiles => true,
+    PackageImports => {"OldChainComplexes"},
     Version => "1.0", 
     Date => "August 31, 2026",
     Keywords => {"Hilbert"},
@@ -51,7 +52,7 @@ quasiPolynomial List := L -> (
     if #L ==0 then error "nonempty list expected for quasiPolynomial";
 
     L' := apply(L, p -> sub(p, T));
-    n := $L';
+    n := #L';
 
     --reduce to minimal period by finding smallest divisor e of n
     --such that the list repeats every e entries
@@ -78,7 +79,7 @@ quasiPolynomial List := L -> (
 
 quasiPolynomial RingElement := f -> quasiPolynomial {f}
 quasiPolynomial ZZ := n -> quasiPolynomial {n*1_T}
-quasiPolynomial QQ :- q -> quasiPolynomial {q*1_T}
+quasiPolynomial QQ := q -> quasiPolynomial {q*1_T}
 
 
 --printing: we might fiddle with this a bit for what looks best.
@@ -93,12 +94,12 @@ toString QuasiPolynomial := Q -> toString apply(Q.constituents, toString)
 --evaluate the quasipoly Q(n) picks the right constituent to evaluate at n
 QuasiPolynomial ZZ := (Q,n) -> (
     ev := map(QQ, T, {promote(n,QQ)});
-    ev Q.constituent#(n % Q.period)
+    ev Q.constituents#(n % Q.period)
 )
 
 --degree of quasi polynomial is the max degree of its constituents
 --I think they should be the same but this is safer
-degree QuasiPolynomial := Q -> max apply(Q.consitutents, p -> first degree p)
+degree QuasiPolynomial := Q -> max apply(Q.constituents, p -> first degree p)
 
 
 -------------------------------------------
@@ -125,7 +126,7 @@ QuasiPolynomial - QuasiPolynomial := (Q,R) -> Q + (-R)
 
 --multiplication of quasi polys
 QuasiPolynomial * QuasiPolynomial := (Q,R) -> (
-    p := lcm(Q.period, R.period) --new period
+    p := lcm(Q.period, R.period); --new period
     quasiPolynomial apply(p, i -> 
         Q.constituents#(i % Q.period) * R.constituents#(i % R.period))
 )
@@ -146,13 +147,13 @@ QuasiPolynomial * QQ := (Q, c) -> c*Q
 quasiPolynomial PolynomialRing := S -> (
     --if this has been computed for the instance previously, return it
     if S.?cache and S.cache#?QuasiPolynomial then return S.cache#QuasiPolynomial;
-    if degreeLength S !=1 hen error "quasiPolynomial expects singly ZZ-graded ring";
-    if any(flattened degrees S, d-> d<=0) then error "quasiPolynomial expects generators of positive degree only";
+    if degreeLength S !=1 then error "quasiPolynomial expects singly ZZ-graded ring";
+    if any(flatten degrees S, d-> d<=0) then error "quasiPolynomial expects generators of positive degree only";
     alpha := lcm flatten degrees S;
     n := numgens S;
     Q := quasiPolynomial for i from 0 to alpha-1 list (
         pts := apply(n+2, j -> (j+1)*alpha + i);
-        mat := sub(matrix apply(n+2, k -> apply(n+2, j -> pts_k^j)) QQ);
+        mat := sub(matrix apply(n+2, k -> apply(n+2, j -> pts_k^j)), QQ);
         vals := sub(transpose matrix {apply(n+2, k -> hilbertFunction((k+1)*alpha+i, S))}, QQ);
         coeffs := solve(mat,vals);
         sum(n+2, j -> coeffs_(j,0) *t^j)
@@ -176,7 +177,7 @@ quasiPolyFree := (M,S) -> (
             j := (i - degs_k) % alpha;
             shift := map(T, T, {t - degs_k});
             shift qp.constituents#j
-        )
+        );
         sum L
     )
 )
