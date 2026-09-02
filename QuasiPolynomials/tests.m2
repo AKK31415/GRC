@@ -2,7 +2,7 @@ TEST ///
     R = QQ[x,y,z,w]
     I = ideal(x*z-y^2, w*y-z^2, x*w-y*z)
     M = module R/I
-    assert(quasiPolynomial(M) == (new QuasiPolynomial from {symbol constituents => {3*t+1}, symbol period => 1, symbol cache => new CacheTable}))
+    assert(quasiPolynomial M == (new QuasiPolynomial from {symbol constituents => {3*t+1}, symbol period => 1, symbol cache => new CacheTable}))
 ///
 
 TEST ///
