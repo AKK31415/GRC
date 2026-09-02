@@ -206,3 +206,15 @@ quasiPolynomial Ideal := I -> quasiPolynomial comodule I
 
 beginDocumentation()
 load "./QuasiPolynomials/docs.m2"
+load "./QuasiPolynomials/tests.m2"
+
+end
+
+
+--------------------------------------------------------------
+-- DEVELOPMENT CODE ------------------------------------------
+--------------------------------------------------------------
+
+restart
+needsPackage "QuasiPolynomials"
+check "QuasiPolynomials"
