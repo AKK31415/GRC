@@ -12,8 +12,8 @@ newPackage(
         {Name => "Ben Betts",
          Email => "fraughn@unm.edu",
          HomePage => "https://benbettsmath.github.io"},
-        {Name => "Isadora Bailey",
-         Email => "",
+        {Name => "Isidora Bailly-Hall",
+         Email => "ibaillyh@umn.edu",
          HomePage => ""}
     },
     Headline => "Methods for computing quasi-polynomials"
