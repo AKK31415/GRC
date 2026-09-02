@@ -7,7 +7,8 @@ newPackage(
     Keywords => {"Hilbert"},
     Authors => {
         {Name => "Andrew Karsten", 
-         Email => "akk0071@auburn.edu"},
+         Email => "akk0071@auburn.edu",
+         HomePage => "https://sites.google.com/view/andrewkarsten/home"},
         {Name => "Ben Betts",
          Email => "fraughn@unm.edu",
          HomePage => "https://benbettsmath.github.io"},
