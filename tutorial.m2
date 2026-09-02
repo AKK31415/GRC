@@ -1,8 +1,5 @@
-<<<<<<< HEAD
 needsPackage ("QuasiPolynomials", Reload => True)
-=======
 needsPackage "QuasiPolynomials"
->>>>>>> 0f0a871f95ccd61c40f87b6dfd02443c14df8d89
 
 -- construct by hand from a list of polynomials in QQ[t]
 R = QQ[t]

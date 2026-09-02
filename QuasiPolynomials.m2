@@ -10,7 +10,7 @@ newPackage(
          Email => "akk0071@auburn.edu"},
         {Name => "Ben Betts",
          Email => "fraughn@unm.edu",
-         HomePage => ""},
+         HomePage => "https://benbettsmath.github.io"},
         {Name => "Isadora Bailey",
          Email => "",
          HomePage => ""}
