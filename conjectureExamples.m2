@@ -96,6 +96,9 @@ weighted1n2Veronese(ZZ,ZZ,Ring) := (n,e,kk) -> (
 )
 
 
+weighted1n2Veronese(1,3,ZZ/101)
+weighted1n2Veronese(1,5,ZZ/101)
+for i to 5 list weighted1n2Veronese(1,2*(i+3)+1,ZZ/101)
 
 {*
 
@@ -128,3 +131,12 @@ for i to 6 list (
 restart
 R = ZZ[n]
 ker matrix{{1,-n,1,0},{0,1,0,1}}
+
+
+V = weighted1n2Veronese(1,1,QQ)
+gens V
+degree z_1
+degree w
+tangentCone ideal(z_1,w)
+
+
