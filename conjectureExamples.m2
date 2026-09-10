@@ -124,3 +124,7 @@ for i to 6 list (
 
 
 *}
+
+restart
+R = ZZ[n]
+ker matrix{{1,-n,1,0},{0,1,0,1}}
