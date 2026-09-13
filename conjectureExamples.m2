@@ -107,50 +107,6 @@ weighted1n2Veronese(ZZ,ZZ,Ring) := (n,e,kk) -> (
 )
 
 
-end
---------------------------------------------------------------------
--- Helper function to make the matrix
---------------------------------------------------------------------
-makeCandidates = method()
-
-makeCandidates(ZZ,List,Variable,Variable,Variable,Ideal) := (m,L,x,y,z,I) -> (
-    candidates := {};
-    if m > #L then m=#L;
-    for i from 1 to m do (
-        if isMember(L#i*z-x*y,I) then candidates = append(candidates,L#i);
-    );
-    if #candidates != 1 then print("There was not only one option");
-    candidates
-)
-
-
-makeColCandidates = (m,x_1,L,x_3,I) -> (
-    n := #L;
-    for i to n-1 list makeCandidates(m,x_1,L#i,x_3,I)
-)
-
-
-makeLeftHalf = (m,R,L) -> (
-    #R := sizeR;
-    for j to sizeR - 1 list (
-        makeColCandidates(m,R#j,L,w,I)
-    )
-)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 end -- Development and testing down here
 restart
 load "conjectureExamples.m2"
