@@ -50,32 +50,34 @@ gens I
 S = ZZ/101[x_1..x_20,y]
 
 
-row1 = {};
-row2 = {};
-row3 = {};
-row4 = (
-    tempList := for i from 9 to 20 list z_i;
-    append(tempList,w)
-);
-for i from 1 to 6 do (
-    row1 = append(row1,z_i);
-    row2 = append(row2,z_(i+1));
-    row3 = append(row3,z_(i+2));
-);
-for i from 9 to 12 do (
-    row1 = append(row1,z_i);
-    row2 = append(row2,z_(i+1));
-    row3 = append(row3,z_(i+2));
-);
-for i from 15 to 16 do (
-    row1 = append(row1,z_i);
-    row2 = append(row2,z_(i+1));
-    row3 = append(row3,z_(i+2));
-);
-row1 = append(row1,z_19^2);
-row2 = append(row2,z_19*z_20);
-row3 = append(row3,z_20^2);
-M = matrix{row1,row2,row3,row4}
+M = (
+    row1 = {};
+    row2 = {};
+    row3 = {};
+    row4 = (
+        tempList := for i from 9 to 20 list z_i;
+        append(tempList,w)
+    );
+    for i from 1 to 6 do (
+        row1 = append(row1,z_i);
+        row2 = append(row2,z_(i+1));
+        row3 = append(row3,z_(i+2));
+    );
+    for i from 9 to 12 do (
+        row1 = append(row1,z_i);
+        row2 = append(row2,z_(i+1));
+        row3 = append(row3,z_(i+2));
+    );
+    for i from 15 to 16 do (
+        row1 = append(row1,z_i);
+        row2 = append(row2,z_(i+1));
+        row3 = append(row3,z_(i+2));
+    );
+    row1 = append(row1,z_19^2);
+    row2 = append(row2,z_19*z_20);
+    row3 = append(row3,z_20^2);
+    matrix{row1,row2,row3,row4}
+)
 J = minors(2,M)
 
 
@@ -84,27 +86,29 @@ load "conjectureExamples.m2"
 R = weighted1n2Veronese(2,9,ZZ/101)
 gens R
 use T
-row1 = {}
-row2 = {}
-row3 = {}
-row4 = (
-    tempList := for i to 19 list z_(11+i);
-    append(tempList,w)
-)
-for i to 3 do (
-    for j to 8-2*i-1 do (
-        k := (
-            if i == 0 then 1 else if i == 1 then 11 else if i == 2 then 19 else 25
+M = (
+    row1 = {};
+    row2 = {};
+    row3 = {};
+    row4 = (
+        tempList := for i to 19 list z_(11+i);
+        append(tempList,w);
+    );
+    for i to 3 do (
+        for j to 8-2*i-1 do (
+            k := (
+                if i == 0 then 1 else if i == 1 then 11 else if i == 2 then 19 else 25
+            );
+            row1 = append(row1,z_(k+j));
+            row2 = append(row2,z_(k+j+1));
+            row3 = append(row3,z_(k+j+2));
         );
-        row1 = append(row1,z_(k+j));
-        row2 = append(row2,z_(k+j+1));
-        row3 = append(row3,z_(k+j+2));
-    )
+    );
+    row1 = append(row1,z_29^2);
+    row2 = append(row2,z_29*z_30);
+    row3 = append(row3,z_30^2);
+    matrix{row1,row2,row3,row4}
 )
-row1 = append(row1,z_29^2)
-row2 = append(row2,z_29*z_30)
-row3 = append(row3,z_30^2)
-M = matrix{row1,row2,row3,row4}
 J = minors(2,M)
 K == J
 
@@ -170,86 +174,86 @@ for i from 4 to 30 list (
     tempList
 )
 
-row1 = {};
-row2 = {};
-row3 = {};
-row4 = {};
-row5 = {};
-row6 = {};
-row7 = {};
-for i from 1 to 4 do (
-    row1 = append(row1,z_i);
-    row2 = append(row2,z_(i+1));
-    row3 = append(row3,z_(i+2));
+M = (
+    row1 = {};
+    row2 = {};
+    row3 = {};
+    row4 = {};
+    row5 = {};
+    row6 = {};
+    row7 = {};
+    for i from 1 to 4 do (
+        row1 = append(row1,z_i);
+        row2 = append(row2,z_(i+1));
+        row3 = append(row3,z_(i+2));
+    );
+    for i from 7 to 9 do (
+        row1 = append(row1,z_i);
+        row2 = append(row2,z_(i+1));
+        row3 = append(row3,z_(i+2));
+    );
+    for i from 12 to 13 do (
+        row1 = append(row1,z_i);
+        row2 = append(row2,z_(i+1));
+        row3 = append(row3,z_(i+2));
+    );
+    for i from 16 to 16 do (
+        row1 = append(row1,z_i);
+        row2 = append(row2,z_(i+1));
+        row3 = append(row3,z_(i+2));
+    );
+    for i from 22 to 23 do (
+        row1 = append(row1,z_i);
+        row2 = append(row2,z_(i+1));
+        row3 = append(row3,z_(i+2));
+    );
+    for i from 26 to 26 do (
+        row1 = append(row1,z_i);
+        row2 = append(row2,z_(i+1));
+        row3 = append(row3,z_(i+2));
+    );
+    row1 = append(row1,z_32^2);
+    row2 = append(row2,z_32*z_33);
+    row3 = append(row3,z_33^2);
+    for i from 7 to 10 do (
+        row4 = append(row4,z_i);
+        row5 = append(row5,z_(i+1));
+    );
+    for i from 12 to 14 do (
+        row4 = append(row4,z_i);
+        row5 = append(row5,z_(i+1));
+    );
+    for i from 16 to 17 do (
+        row4 = append(row4,z_i);
+        row5 = append(row5,z_(i+1));
+    );
+    for i from 19 to 19 do (
+        row4 = append(row4,z_i);
+        row5 = append(row5,z_(i+1));
+    );
+    for i from 26 to 27 do (
+        row4 = append(row4,z_i);
+        row5 = append(row5,z_(i+1));
+    );
+    for i from 29 to 29 do (
+        row4 = append(row4,z_i);
+        row5 = append(row5,z_(i+1));
+    );
+    row4 = append(row4,z_32*z_34);
+    row5 = append(row5,z_33*z_34);
+    for i from 12 to 21 do (
+        row6 = append(row6,z_i);
+    );
+    for i from 29 to 31 do (
+        row6 = append(row6,z_i);
+    );
+    row6 = append(row6,z_34^2);
+    for i from 22 to 34 do (
+        row7 = append(row7,z_i);
+    );
+    row7 = append(row7,w);
+    matrix{row1,row2,row3,row4,row5,row6,row7}
 )
-for i from 7 to 9 do (
-    row1 = append(row1,z_i);
-    row2 = append(row2,z_(i+1));
-    row3 = append(row3,z_(i+2));
-)
-for i from 12 to 13 do (
-    row1 = append(row1,z_i);
-    row2 = append(row2,z_(i+1));
-    row3 = append(row3,z_(i+2));
-)
-for i from 16 to 16 do (
-    row1 = append(row1,z_i);
-    row2 = append(row2,z_(i+1));
-    row3 = append(row3,z_(i+2));
-)
-for i from 22 to 23 do (
-    row1 = append(row1,z_i);
-    row2 = append(row2,z_(i+1));
-    row3 = append(row3,z_(i+2));
-)
-for i from 26 to 26 do (
-    row1 = append(row1,z_i);
-    row2 = append(row2,z_(i+1));
-    row3 = append(row3,z_(i+2));
-)
-row1 = append(row1,z_32^2);
-row2 = append(row2,z_32*z_33);
-row3 = append(row3,z_33^2);
-for i from 7 to 10 do (
-    row4 = append(row4,z_i);
-    row5 = append(row5,z_(i+1));
-)
-for i from 12 to 14 do (
-    row4 = append(row4,z_i);
-    row5 = append(row5,z_(i+1));
-)
-for i from 16 to 17 do (
-    row4 = append(row4,z_i);
-    row5 = append(row5,z_(i+1));
-)
-for i from 19 to 19 do (
-    row4 = append(row4,z_i);
-    row5 = append(row5,z_(i+1));
-)
-for i from 26 to 27 do (
-    row4 = append(row4,z_i);
-    row5 = append(row5,z_(i+1));
-)
-for i from 29 to 29 do (
-    row4 = append(row4,z_i);
-    row5 = append(row5,z_(i+1));
-)
-row4 = append(row4,z_32*z_34);
-row5 = append(row5,z_33*z_34);
-for i from 12 to 21 do (
-    row6 = append(row6,z_i);
-)
-for i from 29 to 31 do (
-    row6 = append(row6,z_i);
-)
-row6 = append(row6,z_34^2);
-for i from 22 to 34 do (
-    row7 = append(row7,z_i);
-)
-row7 = append(row7,w);
-
-M = matrix{row1,row2,row3,row4,row5,row6,row7}
-
 J = minors(2,M)
 K == J
 
