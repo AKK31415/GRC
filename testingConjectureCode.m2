@@ -382,3 +382,53 @@ degree w
 tangentCone ideal(z_1,w)
 
 
+restart
+load "conjectureExamples.m2"
+for i to 5 list (
+    makeMatrix(1,2*i+3)
+)
+
+
+restart
+load "conjectureExamples.m2"
+for i to 5 list (
+    R := weighted1n2Veronese(1,2*i+3,ZZ/101);
+    N := changeBackToXY(R,S,T,makeMatrix(1,2*i+3));
+    tempRowVec := matrix(
+        tempRow := for i to numColumns N - 1 list (
+            N_(0,i)//(x_1^2)
+        );
+        {tempRow}
+    );
+    --flatten for i to numColumns tempRowVec - 1 list degree tempRowVec_(0,i)
+    tempRowVec
+)
+
+restart
+load "conjectureExamples.m2"
+for i to 5 list (
+    R = weighted1n2Veronese(1,2*i+3,ZZ/101);
+    use T;
+    M = makeGuessXYmatrix(2*i+3,S);
+    ideal R == minors(2,turnToZiMatrixFromXY(M,S,T,mons))
+)
+for i to 4 list (
+    R = weighted1n2Veronese(3,2*i+3,ZZ/101);
+    use T;
+    M = makeGuessXYmatrix(2*i+3,S);
+    ideal R == minors(2,turnToZiMatrixFromXY(M,S,T,mons))
+)
+
+restart
+load "conjectureExamples.m2"
+funct = (n,e) -> (
+    R = weighted1n2Veronese(n,e,ZZ/101);
+    use T;
+    M = makeGuessXYmatrix(e,S);
+    ideal R == minors(2,turnToZiMatrixFromXY(M,S,T,mons))
+)
+e = 5
+R = weighted1n2Veronese(5,e,ZZ/101)
+use T
+M = makeGuessXYmatrix(e,S);
+ideal R == minors(2,turnToZiMatrixFromXY(M,S,T,mons))

@@ -107,4 +107,92 @@ weighted1n2Veronese(ZZ,ZZ,Ring) := (n,e,kk) -> (
 )
 
 
+makeMatrix = method() -- Method for making the matrix of z's
+
+makeMatrix(ZZ,ZZ) := (n,e) -> (
+    if n == 1 then (
+        R = weighted1n2Veronese(n,e,ZZ/101);
+        if e%2 == 0 then error "Expected odd degree embedding";
+        k := e//2; -- so e=2k+1 
+        row1 := for i to k list (
+            if i == k then (z_(i+1))^2 else z_(i+1)
+        );
+        row2 := for i to k list (
+            if i == k then w else z_(i+2)
+        );
+        return matrix{row1,row2}
+    ) else error "Not yet implemented for n>=2"
+)
+
+changeBackToXY = method()
+
+changeBackToXY(Ring,Ring,Ring,Matrix) := (R,S,T,M) -> (
+    e := (degree mons_0)_0;
+    n := #(gens S) - 1;
+    matrix for i to numRows M - 1 list (
+        tempRow := for j to numColumns M - 1 list (
+            tempEntry := 0;
+            gensT := gens T;
+            if j == numColumns M - 1 then (
+                if M_(i,j) == w then tempEntry = y^e else (
+                    for k from #gensT - (n+1) to #gensT - 1 do (
+                        for l from #gensT - (n+1) to #gensT - 1 do (
+                            if z_k*z_l == M_(i,j) then tempEntry = mons#(k-1)*mons#(l-1);
+                        );
+                    );
+                );
+            ) else (
+                for k from 1 to #gensT-1 do (
+                    if M_(i,j) == z_k then tempEntry = mons_(k-1);
+                );
+            );
+            tempEntry
+        );
+        tempRow
+    )
+)
+
+
+makeGuessXYmatrix = method()
+
+makeGuessXYmatrix(ZZ,Ring) := (e,S) -> (
+    gensS := gens S;
+    tempColumn := transpose matrix{makeMonomials(gensS,2)};
+    tempRow := matrix{append(makeMonomials(gensS,e-2),y^(e-1))};
+    tempColumn * tempRow
+)
+
+reverseTriangle = method()
+
+reverseTriangle(ZZ) := n -> (
+    if n == 1 then 1 else 1 + reverseTriangle(n-1)
+)
+
+
+
+turnToZiMatrixFromXY = method()
+
+turnToZiMatrixFromXY(Matrix,Ring,Ring,List) := (M,S,T,mons) -> (
+    gensT := gens T;
+    gensS := gens S;
+    n := #gensS - 1;
+    use T;
+    d := reverseTriangle(numRows M - 1);
+    transpose matrix for j to numColumns M - 1 list (
+        if j == numColumns M - 1 then append(for i to numRows M - 2 list (
+                tempEntry := 0;
+                for k from #gensT - d to #gensT - 1 do (
+                    for l from #gensT - d to #gensT - 1 do (
+                        if mons_(k-1) * mons_(l-1) == M_(i,j) then tempEntry = z_k * z_l;
+                    );
+                );
+                tempEntry
+            ),w
+        ) else for i to numRows M - 1 list (
+            z_(1+position(mons, m -> m == M_(i,j)))
+        )
+    )
+)
+
+
 end
