@@ -436,40 +436,13 @@ M = makeGuessXYmatrix(e,S);
 
 restart
 load "conjectureExamples.m2"
-testIfGB = (n,e) -> (
-    f := (x,Mminors) -> (
-        for m in Mminors do (
-            if not x//m == 0 then (
-                return true
-            );
-        );
-        false
-    );
-    R = weighted1n2Veronese(n,e,ZZ/101);
-    ZiMat = turnToZiMatrixFromXY(makeGuessXYmatrix(e,S),S,T,mons);
-    MminorsTemp := gens minors(2,ZiMat);
-    Mminors := for i to numColumns MminorsTemp - 1 list MminorsTemp_(0,i);
-    G := gens gb ideal Mminors;
-    Glist := for i to numColumns G - 1 list G_(0,i);
-    failureList := {};
-    for g in Glist do (
-        if not f(g,Mminors) then (
-            --print("false for g=");
-            --print(g);
-            --return false
-            failureList = append(failureList,g);
-        );
-    );
-    --true
-    failureList
-)
 for i to 5 do (
-    print(testIfGB(i+1,3))
+    print(checkIfGroebner(i+1,3))
 )
 for i from 1 to 1 do (
-    print(testIfGB(i+1,5))
+    print(checkIfGroebner(i+1,5))
 )
-L = testIfGB(3,5)
+L = checkIfGroebner(3,5)
 #L
 L
 use T
@@ -486,28 +459,21 @@ p = position(L, l -> (l_0 // y == l_1 // y))
 ZiMat
 
 
-L = testIfGB(1,3)
-L = testIfGB(2,3)
-L = testIfGB(3,3)
-L = testIfGB(4,3)
-L = testIfGB(5,3)
-L = testIfGB(1,5)
-L = testIfGB(2,5)
-L = testIfGB(3,5)
-L = testIfGB(4,5)
-L = testIfGB(1,7)
-L = testIfGB(2,7)
-L = testIfGB(3,7)
-L = testIfGB(1,9)
-L = testIfGB(2,9)
-L = testIfGB(3,9);
+L = checkIfGroebner(1,3)
+L = checkIfGroebner(2,3)
+L = checkIfGroebner(3,3)
+L = checkIfGroebner(4,3)
+L = checkIfGroebner(5,3)
+L = checkIfGroebner(1,5)
+L = checkIfGroebner(2,5)
+L = checkIfGroebner(3,5)
+L = checkIfGroebner(4,5)
+L = checkIfGroebner(1,7)
+L = checkIfGroebner(2,7)
+L = checkIfGroebner(3,7)
+L = checkIfGroebner(1,9);
+L = checkIfGroebner(2,9)
+L = checkIfGroebner(3,9);
 
-gbFailureToBeQuad = L -> (
-    tempOut := {};
-    for l in L do (
-        if not l//w == 0 then tempOut = append(tempOut,l) else if not degree l == {2} then tempOut = append(tempOut,l)
-    );
-    tempOut
-)
-L = testIfGB(2,15);
-gbFailureToBeQuad L
+L = checkIfGroebner(2,15);
+failureToBeQuad L

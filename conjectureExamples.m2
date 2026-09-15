@@ -5,20 +5,14 @@ restart
 makeP1n2Ring = method()
 
 makeP1n2Ring(ZZ,Ring) := (n,kk) -> (
-    L := for i to n-1 list 1;
-    L = append(L,2);
-    R := kk[x_1..x_n,y, Degrees => flatten L];
-    R
+    kk[x_1..x_n,y, Degrees => append((for i to n-1 list 1),2)]
 )
 
 -- Want to figure out what the right generalization is when we replace 2 with k
 makeP1nkRing = method()
 
 makeP1nkRing(ZZ,ZZ,Ring) := (n,k,kk) -> (
-    L := for i to n-1 list 1;
-    L = append(L,k);
-    R := kk[x_1..x_n,y, Degrees => flatten L];
-    R
+    kk[x_1..x_n,y, Degrees => append((for i to n-1 list 1),k)]
 )
 
 
@@ -54,7 +48,6 @@ makeMonomials(List,ZZ) := (L,d) -> (
     flatten for i to d//degxn list (
         tempList := flatten makeMonomials(take(L,n-1),d-i*degxn);
         for j to #tempList - 1 list (tempList#j)*((L#(n-1))^i)
-        -- append(makeMonomials(take(L,n-1),d-i*degxn),(L#(n-1))^i)
     )
 )
 
@@ -94,16 +87,21 @@ pruneMonomials(List,List) := (mon1,mon2) -> (
 weighted1n2Veronese = method()
 
 weighted1n2Veronese(ZZ,ZZ,Ring) := (n,e,kk) -> (
-    S = makeP1n2Ring(n,kk);
-    genSet := gens S;
+    Stemp := makeP1n2Ring(n,kk);
+    genSet := gens Stemp;
     -- Since currently deg(y)=2 for our examples, we will have 
     -- everything by degree 2e since we will have the pure power y^e
-    mons = append(makeMonomials(genSet,e),y^e);
+    monsTemp := append(makeMonomials(genSet,e),y^e);
     --L := for i to #mons-2 list 1;
-    L := append(for i to #mons-2 list 1,2);
-    T = kk[z_1..z_(#mons-1),w, Degrees => L, MonomialOrder => Lex];
-    K = ker map(S,T,mons);
-    T/K
+    L := append(for i to #monsTemp-2 list 1,2);
+    Ttemp := kk[z_1..z_(#monsTemp-1),w, Degrees => L, MonomialOrder => Lex];
+    Ktemp := ker map(Stemp,Ttemp,monsTemp);
+    output := Ttemp/Ktemp;
+    output.cache#S = Stemp;
+    output.cache#mons = monsTemp;
+    output.cache#T = Ttemp;
+    output.cache#K = Ktemp;
+    output
 )
 
 
@@ -111,8 +109,8 @@ makeMatrix = method() -- Method for making the matrix of z's
 
 makeMatrix(ZZ,ZZ) := (n,e) -> (
     if n == 1 then (
-        R = weighted1n2Veronese(n,e,ZZ/101);
         if e%2 == 0 then error "Expected odd degree embedding";
+        Rtemp := weighted1n2Veronese(n,e,ZZ/101);
         k := e//2; -- so e=2k+1 
         row1 := for i to k list (
             if i == k then (z_(i+1))^2 else z_(i+1)
@@ -120,13 +118,15 @@ makeMatrix(ZZ,ZZ) := (n,e) -> (
         row2 := for i to k list (
             if i == k then w else z_(i+2)
         );
-        return matrix{row1,row2}
+        M := matrix{row1,row2};
+        M.cache#R = Rtemp;
+        M
     ) else error "Not yet implemented for n>=2"
 )
 
 changeBackToXY = method()
 
-changeBackToXY(Ring,Ring,Ring,Matrix) := (R,S,T,M) -> (
+changeBackToXY(Ring,Ring,List,Matrix) := (S,T,mons,M) -> (
     e := (degree mons_0)_0;
     n := #(gens S) - 1;
     matrix for i to numRows M - 1 list (
@@ -194,10 +194,49 @@ turnToZiMatrixFromXY(Matrix,Ring,Ring,List) := (M,S,T,mons) -> (
     )
 )
 
-end
 checkIfGroebner = method()
 
-checkIfGroebner()
+checkIfGroebner(ZZ,ZZ) := (n,e) -> (
+    f := (x,Mminors) -> (
+        for m in Mminors do (
+            if not x//m == 0 then (
+                return true
+            );
+        );
+        false
+    );
+    R := weighted1n2Veronese(n,e,ZZ/101);
+    ZiMat = turnToZiMatrixFromXY(makeGuessXYmatrix(e,R.cache#S),R.cache#S,R.cache#T,R.cache#mons);
+    MminorsTemp := gens minors(2,ZiMat);
+    Mminors := for i to numColumns MminorsTemp - 1 list MminorsTemp_(0,i);
+    G := gens gb ideal Mminors;
+    Glist := for i to numColumns G - 1 list G_(0,i);
+    failureList := {};
+    for g in Glist do (
+        if not f(g,Mminors) then (
+            --print("false for g=");
+            --print(g);
+            --return false
+            failureList = append(failureList,g);
+        );
+    );
+    --true
+    failureList
+)
+
+
+failureToBeQuad = method()
+
+failureToBeQuad(List) := gen -> (
+    tempOut := {};
+    for g in gen do if not degree leadMonomial g == {2} then tempOut = append(tempOut,g);
+    tempOut
+)
+
+
+
+
+
 
 
 end
