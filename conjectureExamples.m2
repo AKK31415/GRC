@@ -99,9 +99,9 @@ weighted1n2Veronese(ZZ,ZZ,Ring) := (n,e,kk) -> (
     -- Since currently deg(y)=2 for our examples, we will have 
     -- everything by degree 2e since we will have the pure power y^e
     mons = append(makeMonomials(genSet,e),y^e);
-    L := for i to #mons-2 list 1;
-    L = append(L,2);
-    T = kk[z_1..z_(#mons-1),w, Degrees => L];
+    --L := for i to #mons-2 list 1;
+    L := append(for i to #mons-2 list 1,2);
+    T = kk[z_1..z_(#mons-1),w, Degrees => L, MonomialOrder => Lex];
     K = ker map(S,T,mons);
     T/K
 )
@@ -193,6 +193,11 @@ turnToZiMatrixFromXY(Matrix,Ring,Ring,List) := (M,S,T,mons) -> (
         )
     )
 )
+
+end
+checkIfGroebner = method()
+
+checkIfGroebner()
 
 
 end
