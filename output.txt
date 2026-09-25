@@ -1,0 +1,9 @@
+Macaulay2, version 1.26.06
+Type "help" to see useful commands
+[?2004h
+i1 : jobs -l
+[?2004lstdio:1:5:(3):[1]: error: no method for binary operator - applied to objects:
+            jobs (of class Symbol)
+      -     l (of class Symbol)
+[?2004h
+i2 : 

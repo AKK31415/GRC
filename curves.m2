@@ -1,5 +1,5 @@
 restart
-d=2
+d=4
 e=2
 
 --Build coordinate ring as a quotient by a determinantal ideal:
@@ -17,7 +17,7 @@ betti res I
 needsPackage "HHLResolutions"
 X = weightedProjectiveSpace(flatten degrees S)
 --the 1,1,2,2 are the dgrees of the variables in the target
-g = map(ZZ^3,ZZ^1,transpose matrix{{1,3,4}})
+g = map(ZZ^4,ZZ^1,transpose matrix{{1,2,5,6}})
 --HARD CODING WARNING
 --the 1,3,4 are the exponents of the variable t
 --That is, this was the d=2, e=2 case where the map was
