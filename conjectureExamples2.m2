@@ -307,8 +307,8 @@ groebnerCheck(ZZ,ZZ,Ring) := (n,e,kk) -> (
 end
 restart
 load "conjectureExamples2.m2"
-n = 3
-e = 3
+n = 2
+e = 7
 kk = ZZ/101
 R = weightedVeronese(n,e,ZZ/101)
 tGuessMat(e,R.cache#S,R.cache#mons)
