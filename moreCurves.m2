@@ -10,6 +10,13 @@ normalCurveRing(ZZ,ZZ) := (d,e) -> (
     I := minors(2,dsMatrix);
     {S/I,S,I,dsMatrix}
 )
+normalCurveRing(ZZ,ZZ,Ring) := (d,e,kk) -> (
+    L := splice{d:1,e:e};
+    S := kk[x_0..x_(d-1),y_0..y_(e-1),Degrees=>L];
+    dsMatrix := matrix{{x_0..x_(d-2),x_(d-1)^e,y_0..y_(e-2)},{x_1..x_(d-1),y_0..y_(e-1)}};
+    I := minors(2,dsMatrix);
+    {S/I,S,I,dsMatrix}
+)
 normalCurve = method()
 normalCurve(ZZ,ZZ) := (d,e) -> (
     --Build coordinate ring as a quotient by a determinantal ideal:
@@ -33,9 +40,46 @@ normalCurve(ZZ,ZZ) := (d,e) -> (
     {R,S,M,res prune M}
 )
 
-makeGuessMatrix = method()
-makeGuessMatrix(ZZ,ZZ) := (d,e) -> (
-    if not e == 2 then error("Not yet implemented for e != 2");
-    normCurveRing := normalCurveRing(d,e);
-    
+makeDSmatrix = method()
+makeDSmatrix(ZZ,ZZ,Ring) := (d,e,kk) -> (
+    L := splice{d:1,e:e};
+    S := kk[x_0..x_(d-1),y_0..y_(e-1),Degrees=>L];
+    matrix{{x_0..x_(d-2),x_(d-1)^e,y_0..y_(e-2)},{x_1..x_(d-1),y_0..y_(e-1)}}
 )
+
+makeGuessMatrix = method()
+makeGuessMatrix(ZZ,ZZ,Ring) := (d,e,kk) -> (
+    if not e == 2 then error("Not yet implemented for e != 2");
+    ncr := normalCurveRing(d,e,kk);
+    M := ncr_3;
+    S := ncr_1;
+    use S;
+    minorsM := minors(2,M);
+    gensMinorsM = gens minorsM;
+    row1 := {};
+    row2 := {};
+    for i to numColumns gensMinorsM - 1 do (
+        row1 = append(row1,(gensMinorsM_(0,i)));
+        row2 = append(row2,0);
+    );
+    gensS := gens S;
+    for i to numColumns M - 3 do (
+        row1 = append(row1,-gensS_(i+1)*gensS_(d-1));
+        row2 = append(row2,gensS_i);
+    );
+    row1 = append(row1,-gensS_d);
+    row2 = append(row2,gensS_(d-1));
+    row1 = append(row1,-gensS_(d-1)*gensS_(d+1));
+    row2 = append(row2,gensS_d);
+    matrix{row1,row2}
+)
+
+
+end
+-- Development down here
+restart
+load "moreCurves.m2"
+d=3
+e=2
+M = makeGuessMatrix(d,e,ZZ/101)
+prune M
