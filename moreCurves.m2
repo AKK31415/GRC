@@ -75,7 +75,9 @@ makeGuessMatrix(ZZ,ZZ,Ring) := (d,e,kk) -> (
 
 
 end
+-------------------------------------------------------
 -- Development down here
+-------------------------------------------------------
 restart
 load "moreCurves.m2"
 d=3
