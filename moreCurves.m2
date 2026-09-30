@@ -9,14 +9,15 @@ normalCurveRing(ZZ,ZZ) := (d,e) -> (
     dsMatrix := matrix{{x_0..x_(d-2),x_(d-1)^e,y_0..y_(e-2)},{x_1..x_(d-1),y_0..y_(e-1)}};
     I := minors(2,dsMatrix);
     {S/I,S,I,dsMatrix}
-)
+) -- {S/I,S,I,dsMatrix}
 normalCurveRing(ZZ,ZZ,Ring) := (d,e,kk) -> (
     L := splice{d:1,e:e};
     S := kk[x_0..x_(d-1),y_0..y_(e-1),Degrees=>L];
     dsMatrix := matrix{{x_0..x_(d-2),x_(d-1)^e,y_0..y_(e-2)},{x_1..x_(d-1),y_0..y_(e-1)}};
     I := minors(2,dsMatrix);
     {S/I,S,I,dsMatrix}
-)
+) -- {S/I,S,I,dsMatrix}
+
 normalCurve = method()
 normalCurve(ZZ,ZZ) := (d,e) -> (
     --Build coordinate ring as a quotient by a determinantal ideal:
@@ -38,7 +39,7 @@ normalCurve(ZZ,ZZ) := (d,e) -> (
     M := HH_0(HHL);
     --This M is the normalization of the Davis-Sobieska
     {R,S,M,res prune M}
-)
+) -- {R,S,M,res prune M} where M is the HHL_0
 
 makePureQuadMinorsDS = method()
 makePureQuadMinorsDS(Matrix,Ring) := (M',S) -> (
