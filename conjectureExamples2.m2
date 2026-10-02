@@ -1,5 +1,3 @@
-restart
-
 -- Method for making the ring with the appropriate weights
 makeP1n2Ring = method()
 makeP1n2Ring(ZZ,Ring) := (n,kk) -> (
@@ -10,6 +8,11 @@ makeP1n2Ring(ZZ,Ring) := (n,kk) -> (
 makeP1nkRing = method()
 makeP1nkRing(ZZ,ZZ,Ring) := (n,k,kk) -> (
     kk[x_1..x_n,y, Degrees => append((for i to n-1 list 1),k)]
+)
+
+makeP124Ring = method()
+makeP124Ring(Ring) := (kk) -> (
+    kk[x,y,z, Degrees => {1,2,4}]
 )
 
 -- Helper method for making all monomials from a list of generators 
@@ -44,6 +47,17 @@ makeMonomials(List,ZZ) := (L,d) -> (
     )
 )
 
+isAlreadyGenerated = method()
+isAlreadyGenerated(List,RingElement) := (L,m) -> ( -- L is gens so far
+    isGenerated := false;
+    apply(L, l -> (
+        if m % l == 0 then (
+            if m == l then (isGenerated = true; break) else if isAlreadyGenerated(L,m//l) then (isGenerated = true; break);
+        );
+    ));
+    isGenerated
+)
+
 pruneMonomials = method()
 -- returns the set of monomials from mon2 that 
 -- were not combos of stuff from mon1
@@ -54,17 +68,15 @@ pruneMonomials = method()
 -- so we need not compute monomials in degree 2e then prune, at 
 -- least for this example. This function might be useful in the 
 -- future though, so I won't delete it for now.
-pruneMonomials(List,List) := (mon1,mon2) -> (
-    -- if mon2 is empty we neeed not prune
-    if #mon2 == 0 then return {};
+-- Need to fix this method
+pruneMonomials(List,List) := (prevMons,mon2) -> (
     -- check the first element now, and do the rest later
-    tempRest := drop(mon2,1);
-    for i to #mon1 - 1 do (
-        if (mon2#0) % (mon1#i) == 0 then (
-            return pruneMonomials(mon1,tempRest)
-        );
-    );
-    append({mon2#0},pruneMonomials(mon1,tempRest))
+    newMon2 := flatten apply(mon2,m -> (
+        if isAlreadyGenerated(prevMons,m) then {} else {m}
+    ));
+    -- if mon2 is empty we neeed not prune
+    if #newMon2 == 0 then return prevMons;
+    pruneMonomials(prevMons|{newMon2#0},drop(newMon2,1))
 )
 
 weighted1n2Veronese = method()
@@ -80,6 +92,29 @@ weighted1n2Veronese(ZZ,ZZ,Ring) := (n,e,kk) -> (
     output := Ttemp/Ktemp;
     output.cache#S = Stemp;
     output.cache#mons = monsTemp;
+    output.cache#T = Ttemp;
+    output.cache#K = Ktemp;
+    output
+)
+
+weighted124Veronese = method()
+weighted124Veronese(ZZ,Ring) := (e,kk) -> (
+    Stemp := makeP124Ring(kk);
+    currentGens := makeMonomials(gens Stemp,e);
+    currentDegree := 2*e;
+    mOut := {};
+    while not mOut == currentGens do (
+        mOut = currentGens;
+        for i to 3 do (
+            currentGens = pruneMonomials(currentGens,makeMonomials(gens Stemp,currentDegree));
+            currentDegree += e;
+        );
+    );
+    Ttemp := kk[for m in currentGens list t_m, -*Degrees => (for m in currentGens list (degree m)//e)*-];
+    Ktemp := ker map(Stemp,Ttemp,currentGens);
+    output := Ttemp/Ktemp;
+    output.cache#S = Stemp;
+    output.cache#mons = currentGens;
     output.cache#T = Ttemp;
     output.cache#K = Ktemp;
     output
@@ -225,6 +260,78 @@ checkIfGroebnerQuad(ZZ,ZZ) := (n,e) -> (
     {(n,e),missingGlist,ZiMat,gens R.cache#T,R.cache#mons}
 )
 
+factorMomomial = method()
+factorMonomial = (monList,m) -> (
+    numMons := #monList;
+    for i to numMons - 1 do (
+        l := monList#(numMons - i - 1);
+        if m % l == 0 then (
+            if m == l then (return {l});
+            tempFactoring := factorMonomial(monList,m//l);
+            if not #tempFactoring == 0 then (return append(tempFactoring,l));
+        );
+    );
+    {}
+)
+
+make124tMat = method()
+make124tMat(ZZ,Ring) := (e,R) -> (
+    -- Assuming e = 5 for now
+    xyzMat := (transpose matrix{makeMonomials(gens R.cache#S,4)}) * matrix{makeMonomials(gens R.cache#S,e-4)|makeMonomials(gens R.cache#S,2*e-4)|makeMonomials(gens R.cache#S,3*e-4)|makeMonomials(gens R.cache#S,4*e-4)};
+    use R.cache#T;
+    makeMatT(xyzMat,R)
+)
+
+makeMatT = method()
+makeMatT(Matrix,Ring) := (M,R) -> (
+    use R.cache#T;
+    matrix for i to numRows M - 1 list (
+        for j to numColumns M - 1 list (
+            entry := 1;
+            for l in factorMonomial(R.cache#mons,M_(i,j)) do (
+                entry *= t_l;
+            );
+            entry
+        )
+    )
+)
+
+makeMatX1n2 = method()
+makeMatX1n2 = (R,e,l) -> ( -- l is lcm maybe
+    row := {};
+    trimMons := (L1,L2) -> (
+        flatten apply(L2, l -> (
+            for m in L1 do (
+                if l%m == 0 then return {}
+            );
+            {l}
+        ))
+    );
+    for i to l-1 do (
+        row = flatten append(row,trimMons(row,makeMonomials(gens R.cache#S,e*(i+1)-2)));
+    );
+    (transpose matrix{makeMonomials(gens R.cache#S,2)}) * matrix{row}
+)
+
+makeMatX = method()
+makeMatX = (R,e,l) -> (
+    row := {};
+    col := {};
+    trimMons := (L1,L2) -> (
+        flatten apply(L2, l -> (
+            for m in L1 do (
+                if l%m == 0 then return {}
+            );
+            {l}
+        ))
+    );
+    for i to l-1 do (
+        row = flatten append(row,trimMons(row,makeMonomials(gens R.cache#S,e*(i+1)-l)));
+        col = flatten append(col,trimMons(col,makeMonomials(gens R.cache#S,l+i*e)));
+    );
+    (transpose matrix{col}) * matrix{row}
+)
+
 
 
 
@@ -258,14 +365,17 @@ makeLexMonomials(List,ZZ) := (L,d) -> (
 )
 
 weightedVeronese = method()
-weightedVeronese(ZZ,ZZ,Ring) := (n,e,kk) -> (
-    Stemp := makeP1n2Ring(n,kk);
+weightedVeronese(List,Ring,ZZ) := (L,kk,e) -> (
+    Stemp := kk[for i to #L-1 list x_i, Degrees => L];
     genSet := gens Stemp;
     -- Since currently deg(y)=2 for our examples, we will have 
     -- everything by degree 2e since we will have the pure power y^e
-    monsTemp := flatten append({y^e},makeLexMonomials(genSet,e));
+    monsTemp := {};
+    for i to lcm L - 1 do (
+        monsTemp = pruneMonomials(monsTemp,makeMonomials(genSet,e*(i+1)));
+    );
     --varBlocks := 
-    Ttemp := kk[for m in monsTemp list t_m, Degrees => append((for i to #monsTemp - 2 list 1),2), MonomialOrder => {Lex => 1, GRevLex => #monsTemp - 2}];
+    Ttemp := kk[for m in monsTemp list t_m];
     Ktemp := ker map(Stemp,Ttemp,monsTemp);
     output := Ttemp/Ktemp;
     output.cache#S = Stemp;
@@ -305,30 +415,88 @@ groebnerCheck(ZZ,ZZ,Ring) := (n,e,kk) -> (
 )
 
 end
+-- Developing
 restart
 load "conjectureExamples2.m2"
-n = 2
-e = 7
+e = 5
 kk = ZZ/101
-R = weightedVeronese(n,e,ZZ/101)
-tGuessMat(e,R.cache#S,R.cache#mons)
-tempBool = true
-gensK = gens R.cache#K
-gensGbK = gens gb R.cache#K
-tempList = {}
-f = (g,L) -> (
-    for i to numColumns L - 1 do (
-        if L_i == g then return true
-    );
-    false
+WV = weighted124Veronese(e,kk)
+
+M = make124tMat(e,WV)
+minors(2,M) == WV.cache#K
+I = minors(2,M);
+J = WV.cache#K;
+numColumns gens gb I
+numColumns gens gb J
+gI = gens gb I
+gJ = gens gb J
+flatten for i to numColumns gI - 1 list (
+    if isMember(gI_(0,i),J) then {} else gI_(0,i)
 )
-for i to numColumns gensGbK - 1 do (
-    if not f(gensGbK_(0,i),gensK) then tempList = append(tempList,gensGbK_(0,i));
-);
-#tempList
-tempList
-apply(tempList, t -> degree leadMonomial t)
+flatten for i to numColumns gJ - 1 list (
+    if isMember(gJ_(0,i),I) then {} else gJ_(0,i)
+)
+
+netList for i to 3 list (
+    for j to 4 list (
+        flatten degrees weighted124Veronese(4*j+i,ZZ/101)
+    )
+)
+WV.cache#K
+gens oo
+numColumns oo
+
+restart
+load "conjectureExamples2.m2"
+R = ZZ/101[x,y]
+f = x^5*y
+L = {x^2,x*y}
+factorMonomial(L,f)
 
 
+restart
+load "conjectureExamples2.m2"
+e = 5;
+kk = ZZ/101;
+L = {1,2,4};
+R = weightedVeronese(L,kk,e);
+xMat = makeMatX(R,e,lcm L);
+tMat = makeMatT(xMat,R);
+I = minors(2,tMat);
+J = R.cache#K;
+I == J
+gI = gens gb I;
+gJ = gens gb J;
+numColumns gI
+numColumns gJ
+flatten for i to numColumns gI - 1 list (
+    if isMember(gI_(0,i),J) then {} else gI_(0,i)
+)
+flatten for i to numColumns gJ - 1 list (
+    if isMember(gJ_(0,i),I) then {} else gJ_(0,i)
+)
 
-end
+restart
+load "conjectureExamples2.m2"
+e = 5;
+kk = ZZ/101;
+L = {1,1,2,2}
+R = weightedVeronese(L,kk,e);
+xMat = makeMatX(R,e,lcm L);
+tMat = makeMatT(xMat,R);
+I = minors(2,tMat);
+J = R.cache#K;
+use R.cache#T;
+checkNonstandardKoszul(J,10)
+I == J
+gI = gens gb I;
+gJ = gens gb J;
+numColumns gI
+numColumns gJ
+flatten for i to numColumns gI - 1 list (
+    if isMember(gI_(0,i),J) then {} else gI_(0,i)
+)
+flatten for i to numColumns gJ - 1 list (
+    if isMember(gJ_(0,i),I) then {} else gJ_(0,i)
+)
+#oo
