@@ -38,7 +38,7 @@ normalCurve(ZZ,ZZ) := (d,e) -> (
     --To minimize the HHL resolution:
     M := HH_0(HHL);
     --This M is the normalization of the Davis-Sobieska
-    {R,S,M,res prune M}
+    {R,S,M,res prune M,HHL}
 ) -- {R,S,M,res prune M} where M is the HHL_0
 
 makePureQuadMinorsDS = method()

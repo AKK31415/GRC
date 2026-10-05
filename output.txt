@@ -1,9 +1,11 @@
 Macaulay2, version 1.26.06
 Type "help" to see useful commands
-[?2004h
-i1 : jobs -l
-[?2004lstdio:1:5:(3):[1]: error: no method for binary operator - applied to objects:
-            jobs (of class Symbol)
-      -     l (of class Symbol)
-[?2004h
-i2 : 
+moreCurves.m2:93:16:(3):[11]: warning: local declaration of mult shields variable with same name
+moreCurves.m2:94:16:(3):[11]: warning: local declaration of newCol shields variable with same name
+/opt/homebrew/Cellar/macaulay2/1.26.06_1/share/Macaulay2/Core/robust.m2:100:30:(1):[10]: error: no method for binary operator ^ applied to objects:
+            x   (of class IndexedVariable)
+             -1
+      ^     2 (of class ZZ)
+/opt/homebrew/Cellar/macaulay2/1.26.06_1/share/Macaulay2/Core/robust.m2:100:30:(1): entering debugger (enter 'help' to see commands)
+/opt/homebrew/Cellar/macaulay2/1.26.06_1/share/Macaulay2/Core/robust.m2:100:25-100:66: --source code:
+                         error toString stack(line1, line2, line3))))));
