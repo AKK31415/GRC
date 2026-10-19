@@ -128,7 +128,7 @@ end
 -------------------------------------------------------
 restart
 load "moreCurves.m2"
-d=3
+d=7
 e=2
 M = makeGuessFullMatrix(d,e,ZZ/101)
 M = columnOps(M,d)
@@ -136,3 +136,46 @@ M = minimizeMatrix M
 leadTerm M_(0,2)
 makeGuessMatrix(d,e,ZZ/101)
 minimalPresentation M
+
+restart
+needsPackage "IntegralClosure"
+load "moreCurves.m2"
+d = 2
+e = 3
+ncr = normalCurveRing(d,e,ZZ/101);
+R = ncr_0;
+S = ncr_1;
+Rtemp = integralClosure R
+use S
+M = module Rtemp
+Q = coker(map(M,R^1,matrix{{1}}))
+
+needsPackage "SimplicialComplexes"
+d = 3
+R = ZZ/101[x_0..x_(d-1),y_0,y_1]
+Ann = monomialIdeal(x_0..x_(d-2),y_0,x_(d-1)^2,x_(d-1)*y_1)
+tRes = taylorResolution Ann
+Res = res Ann
+tRes.dd_2
+
+restart
+R = ZZ/101[x_0,x_1,y_0,y_1,y_2]
+M1 = matrix{
+    {0,-y_2,0,0},
+    {0,0,-x_1*y_2,0},
+    {0,0,x_0*y_2,x_1*y_2},
+    {0,0,0,-y_2},
+    {0,0,0,0},
+    {0,0,0,0}
+}
+M2 = transpose matrix{
+    {-y_1,y_0,-x_1,x_0}
+}
+M1*M2
+
+restart
+needsPackage "OldChainComplexes"
+load "moreCurves.m2"
+ncr = normalCurveRing(3,2,ZZ/101)
+DSmat = ncr_3
+eagonNorthcott DSmat
